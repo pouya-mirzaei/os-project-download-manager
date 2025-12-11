@@ -1,6 +1,8 @@
 from dotenv import load_dotenv
 import os
 
+import threading
+import time
 
 load_dotenv()
 
@@ -23,6 +25,37 @@ class DownloadManager:
 
         return groups
 
+    def _create_threads(self):
+        # For each group we will create a thread
+
+        threads = []
+
+        for group_id in range(self.num_threads):
+            group = self.file_groups[group_id]
+            thread = threading.Thread(
+                target=self.download, args=[group], name=f"{group_id + 1}"
+            )
+            threads.append(thread)
+
+        return threads
+
+    def start_download(self):
+        # Create the threads
+        threads = self._create_threads()
+
+        for thread in threads:
+            thread.start()
+
+    def download(self, files):
+        current_thread = threading.current_thread()
+
+        for f in files:
+            # Simulating the download process with time.sleep()
+            print(f"Thread #{current_thread.name}: Start download of file #{f}")
+            time.sleep(3)
+
+            print(f"Thread #{current_thread.name}: Finish download of file #{f}")
+
 
 # Get input
 num_threads = int(input("Enter number of threads : "))
@@ -31,6 +64,5 @@ num_threads = int(input("Enter number of threads : "))
 manager = DownloadManager(num_files, num_threads)
 
 
-# print(manager.file_groups)
-# for group in manager.file_groups:
-#     print(len(group))
+# start downloading the files
+manager.start_download()
